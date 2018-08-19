@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update sys_domain="global" table="sys_script">
+    <sys_script action="INSERT_OR_UPDATE">
+        <abort_action>false</abort_action>
+        <access>package_private</access>
+        <action_delete>false</action_delete>
+        <action_insert>true</action_insert>
+        <action_query>false</action_query>
+        <action_update>true</action_update>
+        <active>true</active>
+        <add_message>false</add_message>
+        <advanced>true</advanced>
+        <change_fields>false</change_fields>
+        <client_callable>false</client_callable>
+        <collection>x_37610_iplookup_ipaddressinfo</collection>
+        <condition/>
+        <description/>
+        <execute_function>false</execute_function>
+        <filter_condition/>
+        <is_rest>false</is_rest>
+        <message/>
+        <name>Populate IP Address City</name>
+        <order>100</order>
+        <priority>100</priority>
+        <rest_method/>
+        <rest_method_text/>
+        <rest_service/>
+        <rest_service_text/>
+        <rest_variables/>
+        <role_conditions/>
+        <script><![CDATA[(function executeRule(current, previous /*null when async*/) {
+	
+	// Add your code here
+	
+	
+	
+	try {
+		var r = new sn_ws.RESTMessageV2('x_37610_iplookup.IPInfo', 'FilterResponses');
+		r.setStringParameterNoEscape('filter', 'geo');
+		r.setStringParameterNoEscape('ipaddress', current.ip_adress);
+		
+		//override authentication profile
+		//authentication type ='basic'/ 'oauth2'
+		//r.setAuthentication(authentication type, profile name);
+		
+		//set a MID server name if one wants to run the message on MID
+		//r.setMIDServer('MY_MID_SERVER');
+		
+		//if the message is configured to communicate through ECC queue, either
+		//by setting a MID server or calling executeAsync, one needs to set skip_sensor
+		//to true. Otherwise, one may get an intermittent error that the response body is null
+		r.setEccParameter('skip_sensor', true);
+		
+		//var response = r.execute();
+		
+		var response = r.executeAsync(); //Might throw exception if http connection timed out or some issue with sending request itself because of encryption/decryption of password.
+		
+		response.waitForResponse(60); // In seconds. Wait at most 60 seconds to get response from ECC Queue/Mid Server //Might throw exception timing out waiting for response in ECC queue.
+		
+		
+		// Response body from request sent via RESTMessageV2('x_37610_iplookup.IPInfo', 'FilterResponses');
+		var responseBody = response.getBody();
+		var httpStatus = response.getStatusCode();
+		
+		
+		//Convert the json formatted string to javascript object
+		gs.info('responseBody = '+responseBody);
+		
+		//Javascript object by parsing JSON responbody
+		var responseObj = JSON.parse(responseBody);
+		gs.info('responseObj = '+responseObj);
+		
+		
+		//set the value of city field on the IPAddressInfo record
+		//current.city = responseObj.city;
+		FunUtil.updateFieldInTable('x_37610_iplookup_ipaddressinfo', 'sys_id', current.sys_id,'city',responseObj.city );
+		
+		gs.info('city = '+current.city);
+		//current.update();
+		
+		
+	}
+	catch(ex) {
+		var message = ex.getMessage();
+		gs.info('ex= '+ex);
+		gs.info('ex message ='+message);
+	}
+	
+	
+})(current, previous);]]></script>
+        <sys_class_name>sys_script</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2018-08-19 03:20:35</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>a4741dc94f882300d1974fe18110c703</sys_id>
+        <sys_mod_count>11</sys_mod_count>
+        <sys_name>Populate IP Address City</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="IPLookup" source="x_37610_iplookup">84c949454f882300d1974fe18110c7f7</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="IPLookup">84c949454f882300d1974fe18110c7f7</sys_scope>
+        <sys_update_name>sys_script_a4741dc94f882300d1974fe18110c703</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-08-19 06:20:03</sys_updated_on>
+        <template/>
+        <when>async</when>
+    </sys_script>
+    <sys_translated_text action="delete_multiple" query="documentkey=a4741dc94f882300d1974fe18110c703"/>
+</record_update>
